@@ -3,14 +3,16 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 public class Main {
 
@@ -81,7 +83,7 @@ public class Main {
 					}
 					break;
 				// nombre-telefono
-					
+
 				case 3:
 					try {
 						token = s.skip("\\d{9}").match().group();
@@ -96,7 +98,7 @@ public class Main {
 					}
 					break;
 				// buscar:nombre
-					
+
 				case 4:
 					try {
 						token = s.skip("\\p{L}+(\\s+\\p{L}+)*").match().group();
@@ -112,7 +114,7 @@ public class Main {
 					}
 					break;
 				// borrar:nombre
-					
+
 				case 5:
 					try {
 						token = s.skip("\\p{L}+(\\s+\\p{L}+)*").match().group();
@@ -128,22 +130,63 @@ public class Main {
 						estado = 8;
 					}
 					break;
-					
+
 				// guardar:ruta
 				case 6:
+					Map<String, String> ag_sorted = new TreeMap<>();
+					ag_sorted.putAll(agenda);
+					Writer out = null;
+					try {
+						out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:\\agenda.txt")));
+						for (Map.Entry<String, String> entry : ag_sorted.entrySet()) {
+							try {
+								out.write(entry.getKey() + "-" + entry.getValue() + "\r\n");
+								System.out.println("El contacto " + entry.getKey() + " con numero de telefono "
+										+ entry.getValue() + " ha sido guardado.");
+							} catch (IOException e) {
+								System.out.println("Excepción en escritura-> " + e.getMessage());
+								estado = 8;
+							}
+						}
+					} catch (FileNotFoundException e) {
+						System.out.println(e.getMessage());
+						estado = 8;
+					} finally {
+						try {
+							out.close();
+						} catch (IOException e) {
+							System.out.println("Error al cerrar fichero-> " + e.getMessage());
+							estado = 8;
+						}
+					}
+					estado = 8;
 					break;
-					
+
 				// cargar:ruta
 				case 7:
-					token = s.skip("\\p{L}+(\\s+\\p{L}+)*").match().group();
-					String ruta = "C:\\agenda.txt";
-					File fichero = new File(ruta);
-					Scanner s2 = null;
+					String ruta2 = "C:\\agenda.txt";
+					File fichero = new File(ruta2);
+					String[] parts = null;
+					Scanner s2 = new Scanner(System.in);
 					try {
 						s = new Scanner(fichero);
 						while (s.hasNextLine()) {
 							String linea = s.nextLine();
-							System.out.println(linea);
+							parts = linea.split("-");
+							String name = parts[0];
+							String number = parts[1];
+							if (agenda.containsKey(name)) {
+								System.out.println("El contacto " + name + " ya existe. ¿Desea cambiar el número?(SI | NO)");
+								String respuesta = null;
+								System.out.print("? ");
+								respuesta = s2.nextLine();
+								if (respuesta.equals("SI")) {
+									agenda.put(name, number);
+									System.out
+											.println("El contacto se ha actualizado: " + name + "-" + agenda.get(name));
+								} else if (respuesta.equals("NO"))
+									System.out.println("El numero del contacto " + name + " no se cambiara.");
+							}
 						}
 					} catch (Exception e) {
 						System.out.println("Mensaje: " + e.getMessage());
@@ -161,7 +204,6 @@ public class Main {
 					}
 					break;
 				}
-
 			}
 			s.close();
 		} while (!fin);
