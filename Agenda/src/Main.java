@@ -57,6 +57,7 @@ public class Main {
 						estado = 8;
 					}
 					break;
+					
 				case 1:
 					try {
 						s.skip("-");
@@ -66,6 +67,7 @@ public class Main {
 						estado = 8;
 					}
 					break;
+					
 				case 2:
 					try {
 						s.skip(":");
@@ -82,8 +84,8 @@ public class Main {
 						estado = 8;
 					}
 					break;
+					
 				// nombre-telefono
-
 				case 3:
 					try {
 						token = s.skip("\\d{9}").match().group();
@@ -97,8 +99,8 @@ public class Main {
 						estado = 8;
 					}
 					break;
+					
 				// buscar:nombre
-
 				case 4:
 					try {
 						token = s.skip("\\p{L}+(\\s+\\p{L}+)*").match().group();
@@ -107,14 +109,13 @@ public class Main {
 							System.out.println(token + " -> " + telefono);
 						else
 							System.out.println(token + " no se encuentra en la agenda.");
-						estado = 6;
+						estado = 8;
 					} catch (NoSuchElementException e) {
 						System.out.println("Se esperaba un nombre.");
 						estado = 8;
 					}
 					break;
 				// borrar:nombre
-
 				case 5:
 					try {
 						token = s.skip("\\p{L}+(\\s+\\p{L}+)*").match().group();
@@ -133,11 +134,12 @@ public class Main {
 
 				// guardar:ruta
 				case 6:
+					token = s.skip("[A-Z]:(\\\\?([^\\/]*[\\/])*)([^\\/]+)$").match().group();
 					Map<String, String> ag_sorted = new TreeMap<>();
 					ag_sorted.putAll(agenda);
 					Writer out = null;
 					try {
-						out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:\\agenda.txt")));
+						out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(token)));
 						for (Map.Entry<String, String> entry : ag_sorted.entrySet()) {
 							try {
 								out.write(entry.getKey() + "-" + entry.getValue() + "\r\n");
@@ -164,8 +166,8 @@ public class Main {
 
 				// cargar:ruta
 				case 7:
-					String ruta2 = "C:\\agenda.txt";
-					File fichero = new File(ruta2);
+					token = s.skip("[A-Z]:(\\\\?([^\\/]*[\\/])*)([^\\/]+)$").match().group();
+					File fichero = new File(token);
 					String[] parts = null;
 					Scanner s2 = new Scanner(System.in);
 					try {
@@ -180,11 +182,10 @@ public class Main {
 								String respuesta = null;
 								System.out.print("? ");
 								respuesta = s2.nextLine();
-								if (respuesta.equals("SI")) {
+								if (respuesta.equals("SI")||respuesta.equals("Si")||respuesta.equals("si")) {
 									agenda.put(name, number);
-									System.out
-											.println("El contacto se ha actualizado: " + name + "-" + agenda.get(name));
-								} else if (respuesta.equals("NO"))
+									System.out.println("El contacto se ha actualizado: " + name + "-" + agenda.get(name));
+								} else if (respuesta.equals("NO")||respuesta.equals("No")||respuesta.equals("no"))
 									System.out.println("El numero del contacto " + name + " no se cambiara.");
 							}
 						}
