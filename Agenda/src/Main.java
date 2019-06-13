@@ -115,6 +115,7 @@ public class Main {
 						estado = 8;
 					}
 					break;
+					
 				// borrar:nombre
 				case 5:
 					try {
@@ -187,6 +188,8 @@ public class Main {
 									System.out.println("El contacto se ha actualizado: " + name + "-" + agenda.get(name));
 								} else if (respuesta.equals("NO")||respuesta.equals("No")||respuesta.equals("no"))
 									System.out.println("El numero del contacto " + name + " no se cambiara.");
+							} else {
+								agenda.put(name, number);
 							}
 						}
 					} catch (Exception e) {
